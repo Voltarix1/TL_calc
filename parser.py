@@ -50,7 +50,7 @@ def consume_token(tok):
 ## Parsing de input et exp
 
 def parse_input():
-    print("@ATTENTION: parser.parse_input à corriger !") # LIGNE A SUPPRIMER
+    #todo
     return
 
 

@@ -125,7 +125,7 @@ def read_INT_to_EOI():
 
 
 def read_FLOAT_to_EOI():
-    print("@ATTENTION: lexer.read_FLOAT_to_EOI à finir !") # LIGNE A SUPPRIMER
+    #todo
     return False
 
 
@@ -145,7 +145,7 @@ def read_digit():
 
 # Lecture d'un entier en renvoyant sa valeur
 def read_INT():
-    print("@ATTENTION: lexer.read_INT à finir !") # LIGNE A SUPPRIMER
+    #todo
     return 0;
 
 
@@ -155,21 +155,21 @@ global sign_value
 
 # Lecture d'un nombre en renvoyant sa valeur
 def read_NUM():
-    print("@ATTENTION: lexer.read_NUM à finir !") # LIGNE A SUPPRIMER
+    #todo
     return 0;
 
 
 # Parse un lexème (sans séparateurs) de l'entrée et renvoie son token.
 # Cela consomme tous les caractères du lexème lu.
 def read_token_after_separators():
-    print("@ATTENTION: lexer.read_token_after_separators à finir !") # LIGNE A SUPPRIMER
+    #todo
     return (defs.V_T.END, None) # par défaut, on renvoie la fin de l'entrée
 
 
 # Donne le prochain token de l'entrée, en sautant les séparateurs éventuels en tête
 # et en consommant les caractères du lexème reconnu.
 def next_token():
-    print("@ATTENTION: lexer.next_token à finir !") # LIGNE A SUPPRIMER
+    #todo
     return read_token_after_separators()
 
 
