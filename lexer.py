@@ -72,7 +72,7 @@ def consume_char():
         current_char2 = defs.EOI
         return
     next_char = defs.INPUT_STREAM.read(1)
-    # print("@", repr(next_char))  # decommenting this line may help debugging
+    #print("@", repr(next_char))  # decommenting this line may help debugging
     if next_char in defs.V:
         current_char1 = current_char2
         current_char2 = current_char3
@@ -102,8 +102,26 @@ def reinit(stream=sys.stdin):
 
 
 def read_INT_to_EOI():
-    print("@ATTENTION: lexer.read_INT_to_EOI à finir !") # LIGNE A SUPPRIMER
-    return False
+    next_char = peek_char1()
+    if next_char == defs.EOI:
+        return False
+
+    while next_char != defs.EOI:
+        if next_char not in defs.DIGITS:
+            # on sait que l'entrée n'est pas reconnue par l'automate
+            # on finit tout de même la lecture
+            while next_char != defs.EOI:
+                consume_char()
+                next_char = peek_char1()
+            consume_char()
+            return False
+
+        if next_char in defs.DIGITS:
+            consume_char()
+            next_char = peek_char1()
+
+    return True
+    
 
 
 def read_FLOAT_to_EOI():
