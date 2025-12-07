@@ -80,6 +80,14 @@ def consume_char():
         return
     raise LexerError('Character ' + repr(next_char) + ' unsupported')
 
+# Finit entièrement la lecture de l'input
+def consume_input():
+    next_char = peek_char1()
+    while next_char != defs.EOI:
+        consume_char()
+        next_char = peek_char1()
+    consume_char()
+
 def expected_digit_error(char):
     return LexerError('Expected a digit, but found ' + repr(char))
 
@@ -110,10 +118,7 @@ def read_INT_to_EOI():
         if next_char not in defs.DIGITS:
             # on sait que l'entrée n'est pas reconnue par l'automate
             # on finit tout de même la lecture
-            while next_char != defs.EOI:
-                consume_char()
-                next_char = peek_char1()
-            consume_char()
+            consume_input()
             return False
 
         if next_char in defs.DIGITS:
@@ -125,8 +130,61 @@ def read_INT_to_EOI():
 
 
 def read_FLOAT_to_EOI():
-    #todo
-    return False
+    def state_0():
+        next_char = peek_char1()
+        if next_char in defs.DIGITS:
+            consume_char()
+            return state_2()
+        elif next_char == '.':
+            consume_char()
+            return state_1()
+        
+        if next_char == defs.EOI:
+            return False
+        
+        consume_input()
+        return False
+    
+    def state_1():
+        next_char = peek_char1()
+        if next_char in defs.DIGITS:
+            consume_char()
+            return state_3()
+        
+        if next_char == defs.EOI:
+            return False
+        
+        consume_input()
+        return False
+    
+    def state_2():
+        next_char = peek_char1()
+        if next_char in defs.DIGITS:
+            consume_char()
+            return state_2()
+        elif next_char == '.':
+            consume_char()
+            return state_3()
+        
+        if next_char == defs.EOI:
+            return False
+        
+        consume_input()
+        return False
+    
+    def state_3():
+        next_char = peek_char1()
+        if next_char in defs.DIGITS:
+            consume_char()
+            return state_3()
+        
+        if next_char == defs.EOI:
+            return True
+        
+        consume_input()
+        return False
+    
+    return state_0()
 
 
 #################################
