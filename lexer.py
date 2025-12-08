@@ -203,9 +203,19 @@ def read_digit():
 
 # Lecture d'un entier en renvoyant sa valeur
 def read_INT():
-    #todo
-    return 0;
+    entier_lu = 0
+    first_char_ok = False
+    while peek_char1() != defs.EOI:
+        try:
+            entier_lu = 10*entier_lu + read_digit()
+            first_char_ok = True
+        except:
+            break
 
+    if not first_char_ok:
+        return None
+    
+    return entier_lu
 
 global int_value
 global exp_value
@@ -215,6 +225,7 @@ global sign_value
 def read_NUM():
     #todo
     return 0;
+
 
 
 # Parse un lexème (sans séparateurs) de l'entrée et renvoie son token.
@@ -261,5 +272,5 @@ def test_lexer():
 if __name__ == "__main__":
     ## Choisir une seule ligne à décommenter
     # test_INT_to_EOI()
-    # test_FLOAT_to_EOI()
-    test_lexer()
+    test_FLOAT_to_EOI()
+    # test_lexer()
