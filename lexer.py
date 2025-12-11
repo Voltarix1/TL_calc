@@ -116,8 +116,8 @@ def read_INT_to_EOI():
 
     while next_char != defs.EOI:
         if next_char not in defs.DIGITS:
-            # on sait que l'entrée n'est pas reconnue par l'automate
-            # on finit tout de même la lecture
+            # On sait que l'entrée n'est pas reconnue par l'automate
+            # On finit tout de même la lecture
             consume_input()
             return False
 
@@ -217,28 +217,80 @@ def read_INT():
     
     return entier_lu
 
+
 global int_value
 global exp_value
 global sign_value
 
 # Lecture d'un nombre en renvoyant sa valeur
 def read_NUM():
-    #todo
-    return 0;
+    # Lecture de la partie entière
+    next_char = peek_char1()
+    if next_char in defs.DIGITS :
+        int_value = read_INT()
+    elif next_char == '.' and peek_char3()[1] in defs.DIGITS:
+        int_value = 0
+    else:
+        return None
 
+    # Lecture de la partie décimale
+    if peek_char1() == '.':
+        nextnext_char = peek_char3()[1]
+        consume_char()
+        if nextnext_char in defs.DIGITS:
+            flottant = read_INT()
+            int_value += flottant * (10 ** -len(str(flottant)))
+
+    # Lecture de l'exposant
+    if peek_char1() in ['e', 'E']:
+        _, ch2, ch3 = peek_char3() 
+        
+        # On vérifie que l'exposant est bon
+        exp = ch2 in defs.DIGITS
+        exp_signe = ch2 in ['+', '-'] and ch3 in defs.DIGITS
+        
+        if exp or exp_signe:
+            consume_char() # on saute le 'e'
+            
+            sign_value = 1
+            if peek_char1() == '-':
+                consume_char()
+                sign_value = -1
+            elif peek_char1() == '+':
+                consume_char()
+            
+            exp_value = read_INT()
+            int_value *= 10 ** (exp_value * sign_value)
+
+    return int_value
 
 
 # Parse un lexème (sans séparateurs) de l'entrée et renvoie son token.
 # Cela consomme tous les caractères du lexème lu.
 def read_token_after_separators():
-    #todo
+    next_char = peek_char1()
+    if next_char == '#':
+        consume_char()
+        return (defs.V_T.CALC, read_INT())
+    
+    if next_char in (defs.DIGITS | {'.'}):
+        return (defs.V_T.NUM, read_NUM())
+    
+    if next_char in defs.TOKEN_MAP.keys():
+        consume_char()
+        return(defs.TOKEN_MAP[next_char], None)
+    
     return (defs.V_T.END, None) # par défaut, on renvoie la fin de l'entrée
 
 
 # Donne le prochain token de l'entrée, en sautant les séparateurs éventuels en tête
 # et en consommant les caractères du lexème reconnu.
 def next_token():
-    #todo
+    next_char = peek_char1()
+    while next_char in defs.SEP:
+        consume_char()
+        next_char = peek_char1()
+
     return read_token_after_separators()
 
 
@@ -272,5 +324,5 @@ def test_lexer():
 if __name__ == "__main__":
     ## Choisir une seule ligne à décommenter
     # test_INT_to_EOI()
-    test_FLOAT_to_EOI()
-    # test_lexer()
+    # test_FLOAT_to_EOI()
+    test_lexer()
