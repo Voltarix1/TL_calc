@@ -5,7 +5,7 @@ Projet TL : parser - requires Python version >= 3.10
 """
 
 import sys
-from math import factorial
+from math import factorial, pow
 assert sys.version_info >= (3, 10), "Use Python 3.10 or newer !"
 
 import lexer
@@ -50,93 +50,106 @@ def consume_token(tok):
 ## Parsing de input et exp
 
 # exp0 -> NUM | CALC | OPAR exp5 CPAR
-def parse_exp0():
+def parse_exp0(l):
     if get_current() == V_T.NUM:
-        consume_token(V_T.NUM)
+        n = consume_token(V_T.NUM)
+        return n
     elif get_current() == V_T.CALC:
-        consume_token(V_T.CALC)
+        i = consume_token(V_T.CALC)
+        return l[i-1]
     else:
         consume_token(V_T.OPAR)
-        parse_exp5()
+        n = parse_exp5(l)
         consume_token(V_T.CPAR)
+        return n
 
 # exp1 -> exp0 exp1'
-def parse_exp1():
-    parse_exp0()
-    parse_exp1p()
+def parse_exp1(l):
+    n1 = parse_exp0(l)
+    n = parse_exp1p(l, n1)
+    return n
 
 # exp1' -> POW exp1 | e
-def parse_exp1p():
+def parse_exp1p(l, n1):
     if get_current() == V_T.POW:
         consume_token(V_T.POW)
-        parse_exp1()
+        n2 = parse_exp1(l)
+        return pow(n1, n2)
+    return n1
 
 # exp2 -> exp1 Y1
-def parse_exp2():
-    parse_exp1()
-    parse_Y1()
+def parse_exp2(l):
+    n1 = parse_exp1(l)
+    n = parse_Y1(l, n1)
+    return n
 
 # Y1 -> FACT Y1 | e
-def parse_Y1():
+def parse_Y1(l, n1):
+    n = n1 #par défaut
     if get_current() == V_T.FACT:
         consume_token(V_T.FACT)
-        parse_Y1()
+        n = parse_Y1(l, factorial(n1))
+    return n
 
 # exp3 -> SUB exp3 | exp2
-def parse_exp3():
+def parse_exp3(l):
     if get_current() == V_T.SUB:
         consume_token(V_T.SUB)
-        parse_exp3()
+        n0 = parse_exp3(l)
+        return -n0
     else:
-        parse_exp2()
+        n = parse_exp2(l)
+        return n
 
 # exp4 -> exp3 Y2
-def parse_exp4():
-    parse_exp3()
-    parse_Y2()
+def parse_exp4(l):
+    n1 = parse_exp3(l)
+    n = parse_Y2(l, n1)
+    return n
 
 # Y2 -> exp4' Y2 | e
-def parse_Y2():
-    if get_current() in [V_T.MUL, V_T.DIV]:
-        parse_exp4p()
-        parse_Y2()
-
 # exp4' -> MUL exp3 | DIV exp3
-def parse_exp4p():
-    if get_current() == V_T.MUL:
-        consume_token(V_T.MUL)
-        parse_exp3()
-    else:
-        consume_token(V_T.DIV)
-        parse_exp3()
+def parse_Y2(l, n1):
+    n = n1 #par défaut
+    if get_current() in [V_T.MUL, V_T.DIV]:
+        if get_current() == V_T.MUL:
+            consume_token(V_T.MUL)
+            n2 = parse_exp3(l)
+            n = parse_Y2(l, n1*n2)
+        else:
+            consume_token(V_T.DIV)
+            n2 = parse_exp3(l)
+            n = parse_Y2(l, n1/n2)
+    return n
 
 # exo5 -> exp4 Y3
-def parse_exp5():
-    parse_exp4()
-    parse_Y3()
-    
+def parse_exp5(l):
+    n1 = parse_exp4(l)
+    n = parse_Y3(l, n1)
+    return n
 
 # Y3 -> exp5' Y3 | e
-def parse_Y3():
-    if get_current() in [V_T.ADD, V_T.SUB]:
-        parse_exp5p()
-        parse_Y3()
-
 # exp5' -> ADD exp4 | SUB exp4
-def parse_exp5p():
-    if get_current() == V_T.ADD:
-        consume_token(V_T.ADD)
-        parse_exp4()
-    else:
-        consume_token(V_T.SUB)
-        parse_exp4()
+def parse_Y3(l, n1):
+    n = n1 #par défaut
+    if get_current() in [V_T.ADD, V_T.SUB]:
+        if get_current() == V_T.ADD:
+            consume_token(V_T.ADD)
+            n2 = parse_exp4(l)
+            n = parse_Y3(l, n1+n2)
+        else:
+            consume_token(V_T.SUB)
+            n2 = parse_exp4(l)
+            n = parse_Y3(l, n1-n2)
+    return n
 
-def parse_input():
+def parse_input(l0):
+    l = l0 #par défaut
     if get_current() in [V_T.NUM, V_T.CALC, V_T.OPAR, V_T.SUB]:
-        parse_exp5()
+        n = parse_exp5(l0)
         consume_token(V_T.SEQ)
-        parse_input()
-    return
+        l = parse_input(l0 + [n])
+    return l
 
 
 #####################################
@@ -147,7 +160,7 @@ def parse_input():
 
 def parse(stream=sys.stdin):
     init_parser(stream)
-    l = parse_input()
+    l = parse_input([])
     consume_token(V_T.END)
     return l
 
